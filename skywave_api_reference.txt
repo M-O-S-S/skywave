@@ -1,0 +1,18 @@
+name	cmd	READS FROM	WRITES TO
+update_display_name	mod.skywave_bridge.update_display_name()	display_name [0,0]	update_status
+update_description	mod.skywave_bridge.update_description()	description [0,0]	update_status
+update_profile_picture	mod.skywave_bridge.update_profile_picture()	profile_image_path [0,0]	update_status
+update_banner	mod.skywave_bridge.update_banner()	banner_image_path [0,0]	update_status
+update_all_profile	mod.skywave_bridge.update_all_profile()	display_name [0,0], profile_image_path [0,0], banner_image_path [0,0]	update_status
+post_message	mod.skywave_bridge.post_message()	post_text	update_status
+post_with_image	mod.skywave_bridge.post_with_image()	post_text, post_image_path [0,0]	update_status
+post_video	mod.skywave_bridge.post_video()	post_text (optional), video_path [0,0]	update_status
+post_reply	mod.skywave_bridge.post_reply()	post_text, last_post.json	update_status
+populate_jonny_posts	mod.skywave_bridge.populate_jonny_posts()	(logged-in user)	jonny, update_status
+populate_friend_posts	mod.skywave_bridge.populate_friend_posts()	friend [0,0]	friend_output, update_status
+populate_timeline	mod.skywave_bridge.populate_timeline()	(logged-in user)	timeline, update_status
+get_profile_info	mod.skywave_bridge.get_profile_info()	(logged-in user)	displayname, description, update_status
+get_user_stats	mod.skywave_bridge.get_user_stats()	(optional handle arg)	user_stats, update_status
+poll_status	mod.skywave_bridge.poll_status()	(internal queue)	update_status, jonny, friend_output, timeline, displayname, description, user_stats
+clear_busy	mod.skywave_bridge.clear_busy()	(none)	Clears stuck BUSY state, resets update_status to IDLE
+reload_modules	mod.skywave_bridge.reload_modules()	(none)	Reloads skywave_threaded.py from disk
