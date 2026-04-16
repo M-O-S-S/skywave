@@ -2,3 +2,5 @@
 tdimportcache/
 backup/
 __pycache__/
+last_post.json
+image_cache/

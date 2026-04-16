@@ -30,7 +30,7 @@ import os
 import sys
 import importlib
 
-BABBLER_PATH = r"C:\Users\jonny\CascadeProjects\bluesky-babbler"
+BABBLER_PATH = os.path.dirname(os.path.abspath(__file__))
 
 if BABBLER_PATH not in sys.path:
     sys.path.append(BABBLER_PATH)

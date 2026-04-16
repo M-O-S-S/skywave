@@ -254,7 +254,7 @@ class SkyWaveThreaded:
             if username and author_handle == username:
                 post_type = "self_post"
             elif username:
-                bare = username.replace(".bsky.social", "").replace(".z-space.ca", "")
+                bare = username.split(".")[0] if "." in username else username
                 if bare and bare in text:
                     post_type = "mention"
 
