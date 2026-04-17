@@ -16,3 +16,5 @@ get_user_stats	mod.skywave_bridge.get_user_stats()	(optional handle arg)	user_st
 poll_status	mod.skywave_bridge.poll_status()	(internal queue)	update_status, jonny, friend_output, timeline, displayname, description, user_stats
 clear_busy	mod.skywave_bridge.clear_busy()	(none)	Clears stuck BUSY state, resets update_status to IDLE
 reload_modules	mod.skywave_bridge.reload_modules()	(none)	Reloads skywave_threaded.py from disk
+login	mod.skywave_bridge.login_from_td()	(none)	login
+logout	mod.skywave_bridge.logout()	(none)	logout

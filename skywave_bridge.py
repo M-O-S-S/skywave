@@ -42,18 +42,21 @@ import os
 import sys
 import importlib
 
-BABBLER_PATH = os.path.dirname(os.path.abspath(__file__))
+_client = None
 
-if BABBLER_PATH not in sys.path:
-    sys.path.insert(0, BABBLER_PATH)
+def init_client(babbler_path):
+    global _client
 
-import skywave_threaded
-importlib.reload(skywave_threaded)
-from skywave_threaded import SkyWaveThreaded
+    if babbler_path not in sys.path:
+        sys.path.insert(0, babbler_path)
 
-_client = SkyWaveThreaded(babbler_path=BABBLER_PATH)
+    import skywave_threaded
+    importlib.reload(skywave_threaded)
 
-
+    SkyWaveThreaded = skywave_threaded.SkyWaveThreaded
+    _client = SkyWaveThreaded(babbler_path=babbler_path)
+    return _client
+    
 def clear_busy():
     """Force-clear a stuck BUSY state. Drains the queue and resets the active thread."""
     _client._active_thread = None
@@ -433,6 +436,43 @@ def get_user_stats(handle=None):
         return False, str(e)
 
 
+def logout():
+    """Clear all in-memory credentials including any loaded from .env."""
+    if _client is not None:
+        _client.clear_credentials()
+    os.environ.pop("BLUESKY_USERNAME", None)
+    os.environ.pop("BLUESKY_PASSWORD", None)
+    _set_status("IDLE", "Logged out")
+    return True, "Logged out"
+
+
+def login_from_td(babbler_path=None):
+    """Read credentials from op('creds')[0,1] and op('creds')[1,1],
+    store them on the client for all future operations, and verify
+    the login in a background thread. Status appears via poll_status().
+    Clear the creds table afterwards to avoid storing credentials.
+    Pass babbler_path=project.folder from your TD script for reliable path resolution.
+    """
+    global _client
+    try:
+        if _client is None:
+            path = babbler_path or project.folder
+            init_client(path)
+        creds_table = op.creds.op('table')
+        username = str(creds_table[0, 1]).strip()
+        password = str(creds_table[1, 1]).strip()
+        if not username or not password:
+            _set_status("ERROR", "creds table missing username or password")
+            return False, "Missing credentials"
+        _client.set_credentials(username, password)
+        ok, msg = _client.verify_login()
+        poll_status()
+        return ok, msg
+    except Exception as e:
+        _set_status("ERROR", f"Login failed: {e}")
+        return False, str(e)
+
+
 __all__ = [
     "poll_status",
     "clear_busy",
@@ -451,4 +491,6 @@ __all__ = [
     "populate_timeline",
     "get_profile_info",
     "get_user_stats",
+    "login_from_td",
+    "logout",
 ]

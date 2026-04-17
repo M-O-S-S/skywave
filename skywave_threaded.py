@@ -48,6 +48,9 @@ class SkyWaveThreaded:
 
         load_dotenv(self.env_path)
 
+        self._override_username: Optional[str] = None
+        self._override_password: Optional[str] = None
+
         self._active_thread: Optional[threading.Thread] = None
         self._status_queue: "queue.Queue[dict]" = queue.Queue()
 
@@ -102,9 +105,17 @@ class SkyWaveThreaded:
     # Core helpers
     # -------------------------------------------------------------------------
 
+    def set_credentials(self, username: str, password: str) -> None:
+        self._override_username = username
+        self._override_password = password
+
+    def clear_credentials(self) -> None:
+        self._override_username = None
+        self._override_password = None
+
     def _get_credentials(self) -> tuple[str, str]:
-        username = os.getenv("BLUESKY_USERNAME")
-        password = os.getenv("BLUESKY_PASSWORD")
+        username = self._override_username or os.getenv("BLUESKY_USERNAME")
+        password = self._override_password or os.getenv("BLUESKY_PASSWORD")
         if not username or not password:
             raise RuntimeError(
                 f"Missing BLUESKY_USERNAME / BLUESKY_PASSWORD in {self.env_path}"
@@ -578,6 +589,10 @@ class SkyWaveThreaded:
             **stats,
         )
 
+    def _do_verify_login(self) -> None:
+        client, username = self._login_client()
+        self.push_status("SUCCESS", f"Logged in as @{username}")
+
     # -------------------------------------------------------------------------
     # Public API
     # -------------------------------------------------------------------------
@@ -676,6 +691,9 @@ class SkyWaveThreaded:
         If handle is None, fetches stats for the logged-in user.
         """
         return self._start_thread(self._do_get_user_stats, handle)
+
+    def verify_login(self) -> tuple[bool, str]:
+        return self._start_thread(self._do_verify_login)
 
 
 
